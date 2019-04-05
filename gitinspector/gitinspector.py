@@ -36,6 +36,7 @@ from .output.extensionsoutput import ExtensionsOutput
 from .output.filteringoutput import FilteringOutput
 from .output.metricsoutput import MetricsOutput
 from .output.responsibilitiesoutput import ResponsibilitiesOutput
+from .output.archivoxusuariooutput import ArchivoXUsuarioOutput
 from .output.timelineoutput import TimelineOutput
 
 localization.init()
@@ -50,6 +51,8 @@ class Runner(object):
 		self.grading = False
 		self.timeline = False
 		self.useweeks = False
+		self.archivoxusuario = False
+		self.semanal = False
 
 	def process(self, repos):
 		localization.check_compatibility(version.__version__)
@@ -94,6 +97,12 @@ class Runner(object):
 			if self.responsibilities:
 				outputable.output(ResponsibilitiesOutput(summed_changes, summed_blames))
 
+			if self.archivoxusuario:
+				outputable.output(ArchivoXUsuarioOutput(summed_changes, summed_blames))
+
+			if self.semanal:
+				outputable.output(SemanalOutput(summed_changes, summed_blames))
+
 			outputable.output(FilteringOutput())
 
 			if self.list_file_types:
@@ -134,8 +143,8 @@ def main():
 
 	try:
 		opts, args = optval.gnu_getopt(argv[1:], "f:F:hHlLmrTwx:", ["exclude=", "file-types=", "format=",
-		                                         "hard:true", "help", "list-file-types:true", "localize-output:true",
-		                                         "metrics:true", "responsibilities:true", "since=", "grading:true",
+		                                         "hard:true","AxU", "help", "list-file-types:true", "localize-output:true",
+		                                         "metrics:true", "responsibilities:true", "since=", "grading:true", "semanal",
 		                                         "timeline:true", "until=", "version", "weeks:true"])
 		repos = __get_validated_git_repos__(set(args))
 
@@ -201,7 +210,10 @@ def main():
 					clear_x_on_next_pass = False
 					filtering.clear()
 				filtering.add(a)
-
+			elif o == "--AxU":
+				run.archivoxusuario = True
+			elif o == "--semanal":
+				run.semanal = True
 		__check_python_version__()
 		run.process(repos)
 

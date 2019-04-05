@@ -46,6 +46,7 @@ class ResponsibilitiesOutput(Outputable):
 				print("\n" + i, _(MOSTLY_RESPONSIBLE_FOR_TEXT) + ":")
 
 				for j, entry in enumerate(responsibilities):
+					print(str(entry))
 					(width, _unused) = terminal.get_size()
 					width -= 7
 
@@ -73,9 +74,10 @@ class ResponsibilitiesOutput(Outputable):
 					resp_xml += "<h3>{0} {1}</h3>".format(i, _(MOSTLY_RESPONSIBLE_FOR_TEXT))
 
 				for j, entry in enumerate(responsibilities):
+
 					resp_xml += "<div" + (" class=\"odd\">" if j % 2 == 1 else ">") + entry[1] + \
-					            " (" + str(entry[0]) + " eloc)</div>"
-					if j >= 9:
+					            " (" + str(entry[0]) + " lines)</div>"
+					if j >= 15:
 						break
 
 				resp_xml += "</div>"

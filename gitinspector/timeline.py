@@ -27,7 +27,6 @@ class TimelineData(object):
 		self.entries = {}
 		self.total_changes_by_period = {}
 		self.useweeks = useweeks
-
 		for i in authordateinfo_list:
 			key = None
 
@@ -42,19 +41,22 @@ class TimelineData(object):
 			else:
 				self.entries[key].insertions += i[1].insertions
 				self.entries[key].deletions += i[1].deletions
+				self.entries[key].commits += i[1].commits
 
 		for period in self.get_periods():
 			total_insertions = 0
 			total_deletions = 0
+			total_commits = 0
 
 			for author in self.get_authors():
 				entry = self.entries.get((author[0], period), None)
 				if entry != None:
 					total_insertions += entry.insertions
 					total_deletions += entry.deletions
+					total_commits += entry.commits
 
 			self.total_changes_by_period[period] = (total_insertions, total_deletions,
-			                                        total_insertions + total_deletions)
+			                                        total_insertions + total_deletions, total_commits)
 
 	def get_periods(self):
 		return sorted(set([i[1] for i in self.entries]))

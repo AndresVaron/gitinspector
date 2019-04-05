@@ -101,8 +101,8 @@
 					}}
 				}});
 
-				filterResponsibilities();
-				var hiddenResponsibilitiesCount = $("div#responsibilities div h3:hidden").length;
+
+				var hiddenResponsibilitiesCount = 0;
 				if (hiddenResponsibilitiesCount > 0) {{
 					$("div#responsibilities div h3:visible").each(colorRows);
 					$("div#responsibilities").prepend("<div class=\"button\">{show_minor_authors} (" + hiddenResponsibilitiesCount + ") &or;</div>");

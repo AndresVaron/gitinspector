@@ -20,18 +20,14 @@
 from __future__ import print_function
 from __future__ import unicode_literals
 
-class ResponsibiltyEntry(object):
-	blames = {}
-
-class Responsibilities(object):
+class AutorXUsuario(object):
 	@staticmethod
-	def get(blame, author_name):
-		author_blames = {}
+	def get(blame,autores):
 
+		archivos = {}
 		for i in blame.blames.items():
-			if author_name == i[0][0]:
-				total_rows = i[1].rows
-				if total_rows > 0:
-					author_blames[i[0][1]] = total_rows
-
-		return sorted(author_blames.items())
+			archivo = str(i[0][1])
+			if archivo not in archivos:
+				archivos[archivo] = [0] * len(autores)
+			archivos[archivo][autores.index(i[0][0])] += i[1].rows
+		return archivos
