@@ -21,8 +21,16 @@ from __future__ import unicode_literals
 import datetime
 
 class TimelineData(object):
-	def __init__(self, changes, useweeks):
+	def __init__(self, changes, useweeks, ignorar):
 		authordateinfo_list = sorted(changes.get_authordateinfo_list().items())
+		for author in authordateinfo_list:
+
+			if changes.get_latest_email_by_author(author[0][1]) in ignorar:
+				temp = []
+				for aut in authordateinfo_list:
+					if not aut[0][1] == author[0][1]:
+						temp.append(aut)
+				authordateinfo_list = temp
 		self.changes = changes
 		self.entries = {}
 		self.total_changes_by_period = {}
@@ -57,7 +65,6 @@ class TimelineData(object):
 
 			self.total_changes_by_period[period] = (total_insertions, total_deletions,
 			                                        total_insertions + total_deletions, total_commits)
-
 	def get_periods(self):
 		return sorted(set([i[1] for i in self.entries]))
 
@@ -84,7 +91,6 @@ class TimelineData(object):
 		while True:
 			for i in self.entries:
 				entry = self.entries.get(i)
-
 				if period == i[1]:
 					changes_in_period = float(self.total_changes_by_period[i[1]][2])
 					if multiplier * (entry.insertions + entry.deletions) / changes_in_period > max_width:

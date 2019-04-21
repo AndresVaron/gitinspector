@@ -23,10 +23,10 @@ import textwrap
 from ..localization import N_
 from .. import format, gravatar, terminal, timeline
 from .outputable import Outputable
+from datetime import datetime, timedelta
 
 TIMELINE_INFO_TEXT = N_("The following history timeline has been gathered from the repository")
 MODIFIED_ROWS_TEXT = N_("Modified Rows:")
-
 def __output_row__text__(timeline_data, periods, names):
 	print("\n" + terminal.__bold__ + terminal.ljust(_("Author"), 20), end=" ")
 
@@ -59,10 +59,15 @@ def __output_row__text__(timeline_data, periods, names):
 
 	print("")
 
-def __output_row__html__(timeline_data, periods, names):
+def __output_row__html__(timeline_data, periods, names, useweeks):
 	timeline_xml = "<table class=\"git full\"><thead><tr><th>" + _("Author") + "</th>"
-
 	for period in periods:
+		if useweeks:
+				date_obj = datetime.strptime((period+" 1"), '%GW%V %u')
+				start_of_week = date_obj - timedelta(days=date_obj.weekday())  # Monday
+				end_of_week = start_of_week + timedelta(days=6)  # Sunday
+				period =  start_of_week.strftime('%d/%m') + " - " + end_of_week.strftime('%d/%m')
+
 		timeline_xml += "<th>" + str(period) + "</th>"
 
 	timeline_xml += "</tr></thead><tbody>"
@@ -97,14 +102,15 @@ def __output_row__html__(timeline_data, periods, names):
 	print(timeline_xml)
 
 class TimelineOutput(Outputable):
-	def __init__(self, changes, useweeks):
+	def __init__(self, changes, useweeks, ignorar):
 		self.changes = changes
 		self.useweeks = useweeks
+		self.ignorar = ignorar
 		Outputable.__init__(self)
 
 	def output_text(self):
 		if self.changes.get_commits():
-			print("\n" + textwrap.fill(_(TIMELINE_INFO_TEXT) + ":", width=terminal.get_size()[0]))
+			print("\n" + textwrap.fill(_(TIMELINE_INFO_TEXT+"		Green = Additions , Red = Deletions") + ":", width=terminal.get_size()[0]))
 
 			timeline_data = timeline.TimelineData(self.changes, self.useweeks)
 			periods = timeline_data.get_periods()
@@ -112,22 +118,23 @@ class TimelineOutput(Outputable):
 			(width, _unused) = terminal.get_size()
 			max_periods_per_row = int((width - 21) / 11)
 
+			print(periods)
 			for i in range(0, len(periods), max_periods_per_row):
 				__output_row__text__(timeline_data, periods[i:i+max_periods_per_row], names)
 
 	def output_html(self):
 		if self.changes.get_commits():
-			timeline_data = timeline.TimelineData(self.changes, self.useweeks)
+			timeline_data = timeline.TimelineData(self.changes, self.useweeks,self.ignorar)
 			periods = timeline_data.get_periods()
 			names = timeline_data.get_authors()
 			max_periods_per_row = 8
 
 			timeline_xml = "<div><div id=\"timeline\" class=\"box\">"
-			timeline_xml += "<p>" + _(TIMELINE_INFO_TEXT) + ".</p>"
+			timeline_xml += "<p>" + _(TIMELINE_INFO_TEXT)+ ". (Green = Additions , Red = Deletions)" + "</p>"
 			print(timeline_xml)
 
 			for i in range(0, len(periods), max_periods_per_row):
-				__output_row__html__(timeline_data, periods[i:i+max_periods_per_row], names)
+				__output_row__html__(timeline_data, periods[i:i+max_periods_per_row], names,self.useweeks)
 
 			timeline_xml = "</div></div>"
 			print(timeline_xml)

@@ -39,6 +39,7 @@ from .output.responsibilitiesoutput import ResponsibilitiesOutput
 from .output.archivoxusuariooutput import ArchivoXUsuarioOutput
 from .output.timelineoutput import TimelineOutput
 
+ignorar = ["af.varon@uniandes.edu.co","s.rodriguezb1@sis.virtual.uniandes.edu.co","s.rodriguezb1@uniandes.edu.co "]
 localization.init()
 
 class Runner(object):
@@ -53,6 +54,7 @@ class Runner(object):
 		self.useweeks = False
 		self.archivoxusuario = False
 		self.semanal = False
+		self.blmout = False
 
 	def process(self, repos):
 		localization.check_compatibility(version.__version__)
@@ -83,13 +85,14 @@ class Runner(object):
 			os.chdir(previous_directory)
 
 		format.output_header(repos)
-		outputable.output(ChangesOutput(summed_changes))
+		outputable.output(ChangesOutput(summed_changes, ignorar))
 
 		if summed_changes.get_commits():
-			outputable.output(BlameOutput(summed_changes, summed_blames))
+			if self.blmout:
+				outputable.output(BlameOutput(summed_changes, summed_blames))
 
 			if self.timeline:
-				outputable.output(TimelineOutput(summed_changes, self.useweeks))
+				outputable.output(TimelineOutput(summed_changes, self.useweeks, ignorar))
 
 			if self.include_metrics:
 				outputable.output(MetricsOutput(summed_metrics))
@@ -98,7 +101,7 @@ class Runner(object):
 				outputable.output(ResponsibilitiesOutput(summed_changes, summed_blames))
 
 			if self.archivoxusuario:
-				outputable.output(ArchivoXUsuarioOutput(summed_changes, summed_blames))
+				outputable.output(ArchivoXUsuarioOutput(summed_changes, summed_blames, ignorar))
 
 			if self.semanal:
 				outputable.output(SemanalOutput(summed_changes, summed_blames))
@@ -145,7 +148,7 @@ def main():
 		opts, args = optval.gnu_getopt(argv[1:], "f:F:hHlLmrTwx:", ["exclude=", "file-types=", "format=",
 		                                         "hard:true","AxU", "help", "list-file-types:true", "localize-output:true",
 		                                         "metrics:true", "responsibilities:true", "since=", "grading:true", "semanal",
-		                                         "timeline:true", "until=", "version", "weeks:true"])
+		                                         "timeline:true", "until=", "version", "weeks:true", "blms"])
 		repos = __get_validated_git_repos__(set(args))
 
 		#We need the repos above to be set before we read the git config.
@@ -203,6 +206,8 @@ def main():
 				interval.set_until(a)
 			elif o == "-w":
 				run.useweeks = True
+			elif o =="--blms":
+				run.blmout = True
 			elif o == "--weeks":
 				run.useweeks = optval.get_boolean_argument(a)
 			elif o in("-x", "--exclude"):

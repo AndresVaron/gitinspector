@@ -29,19 +29,22 @@ HISTORICAL_INFO_TEXT = N_("The following historical commit information, by autho
 NO_COMMITED_FILES_TEXT = N_("No commited files with the specified extensions were found")
 
 class ChangesOutput(Outputable):
-	def __init__(self, changes):
+	def __init__(self, changes, ignorar):
 		self.changes = changes
+		self.ignorar = ignorar
 		Outputable.__init__(self)
 
 	def output_html(self):
 		authorinfo_list = self.changes.get_authorinfo_list()
+		authorinfo_temp = sorted(self.changes.get_authorinfo_list())
 		total_changes = 0.0
 		changes_xml = "<div><div class=\"box\">"
 		chart_data = ""
 
 		for i in authorinfo_list:
-			total_changes += authorinfo_list.get(i).insertions
-			total_changes += authorinfo_list.get(i).deletions
+			if self.changes.get_latest_email_by_author(i) not in self.ignorar:
+				total_changes += authorinfo_list.get(i).insertions
+				total_changes += authorinfo_list.get(i).deletions
 
 		if authorinfo_list:
 			changes_xml += "<p>" + _(HISTORICAL_INFO_TEXT) + ".</p><div><table id=\"changes\" class=\"git\">"
@@ -51,25 +54,27 @@ class ChangesOutput(Outputable):
 
 			for i, entry in enumerate(sorted(authorinfo_list)):
 				authorinfo = authorinfo_list.get(entry)
-				percentage = 0 if total_changes == 0 else (authorinfo.insertions + authorinfo.deletions) / total_changes * 100
+				if self.changes.get_latest_email_by_author(entry) not in self.ignorar:
 
-				changes_xml += "<tr " + ("class=\"odd\">" if i % 2 == 1 else ">")
+					percentage = 0 if total_changes == 0 else (authorinfo.insertions + authorinfo.deletions) / total_changes * 100
 
-				if format.get_selected() == "html":
-					changes_xml += "<td><img src=\"{0}\"/>{1}</td>".format(
-					               gravatar.get_url(self.changes.get_latest_email_by_author(entry)), entry)
-				else:
-					changes_xml += "<td>" + entry + "</td>"
+					changes_xml += "<tr " + ("class=\"odd\">" if i % 2 == 1 else ">")
 
-				changes_xml += "<td>" + str(authorinfo.commits) + "</td>"
-				changes_xml += "<td>" + str(authorinfo.insertions) + "</td>"
-				changes_xml += "<td>" + str(authorinfo.deletions) + "</td>"
-				changes_xml += "<td>" + "{0:.2f}".format(percentage) + "</td>"
-				changes_xml += "</tr>"
-				chart_data += "{{label: {0}, data: {1}}}".format(json.dumps(entry), "{0:.2f}".format(percentage))
+					if format.get_selected() == "html":
+						changes_xml += "<td><img src=\"{0}\"/>{1}</td>".format(
+						               gravatar.get_url(self.changes.get_latest_email_by_author(entry)), entry)
+					else:
+						changes_xml += "<td>" + entry + "</td>"
 
-				if sorted(authorinfo_list)[-1] != entry:
-					chart_data += ", "
+					changes_xml += "<td>" + str(authorinfo.commits) + "</td>"
+					changes_xml += "<td>" + str(authorinfo.insertions) + "</td>"
+					changes_xml += "<td>" + str(authorinfo.deletions) + "</td>"
+					changes_xml += "<td>" + "{0:.2f}".format(percentage) + "</td>"
+					changes_xml += "</tr>"
+					chart_data += "{{label: {0}, data: {1}}}".format(json.dumps(entry), "{0:.2f}".format(percentage))
+
+					if sorted(authorinfo_list)[-1] != entry:
+						chart_data += ", "
 
 			changes_xml += ("<tfoot><tr> <td colspan=\"5\">&nbsp;</td> </tr></tfoot></tbody></table>")
 			changes_xml += "<div class=\"chart\" id=\"changes_chart\"></div></div>"

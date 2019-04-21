@@ -23,11 +23,11 @@ from __future__ import unicode_literals
 class AutorXUsuario(object):
 	@staticmethod
 	def get(blame,autores):
-
 		archivos = {}
 		for i in blame.blames.items():
-			archivo = str(i[0][1])
-			if archivo not in archivos:
-				archivos[archivo] = [0] * len(autores)
-			archivos[archivo][autores.index(i[0][0])] += i[1].rows
+			if i[0][0] in autores:
+				archivo = str(i[0][1])
+				if archivo not in archivos:
+					archivos[archivo] = [0] * len(autores)
+				archivos[archivo][autores.index(i[0][0])] += i[1].rows
 		return archivos

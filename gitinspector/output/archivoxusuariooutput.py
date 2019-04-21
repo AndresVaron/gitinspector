@@ -25,13 +25,40 @@ from .. import format, gravatar, terminal
 from .. import archivoxusuario as archs
 from .outputable import Outputable
 
-ARCHIVOS_INFO_TEXT = N_("Lo siguente corresponde a la tabla de modificaciones por usuarios en cada archivo, "
-                        "Ademas se genera una tabla por herarquia (dfs)")
+ARCHIVOS_INFO_TEXT = N_("The following resource participation percentage table, by author, was calculated")
+
+def __output_row__html__(recursos, autores):
+	timeline_html = "<table class=\"git full\" border=1 frame=void rules=rows><thead><tr>"
+	timeline_html += "<th>Resource</th> <th>Author</th> <th>Percentage</th>"
+	timeline_html += "</tr></thead><tbody>"
+	i = 0
+	for recurso in recursos.items():
+		colaboradores = []
+		for j in range(len(recurso[1])):
+			if recurso[1][j] > 0:
+				col = {"nombre":autores[j],"porcentaje":recurso[1][j]}
+				colaboradores.append(col)
+		timeline_html += "<tr" + (" class=\"odd\">" if i % 2 == 1 else ">")
+		timeline_html += "<td rowspan=\"+"+str(len(colaboradores))+"+\">" + recurso[0] + "</td>"
+		timeline_html += "<td> "+ colaboradores[0].get("nombre")+"</td>"
+		timeline_html += "<td>" + str(colaboradores[0].get("porcentaje"))+ "%</td>"
+		timeline_html += "</tr>"
+		for k in range(1,len(colaboradores)):
+			timeline_html += "<tr" + (" class=\"odd\">" if i % 2 == 1 else ">")
+			timeline_html += "<td> "+ colaboradores[k].get("nombre")+"</td>"
+			timeline_html += "<td>" + str(colaboradores[k].get("porcentaje"))+ "%</td>"
+			timeline_html += "</tr>"
+		i = i + 1
+
+	timeline_html += "</tbody></table>"
+	print(timeline_html)
+
 
 class ArchivoXUsuarioOutput(Outputable):
-	def __init__(self, changes, blame):
+	def __init__(self, changes, blame,ignorar):
 		self.changes = changes
 		self.blame = blame
+		self.ignorar = ignorar
 		Outputable.__init__(self)
 
 	def output_text(self):
@@ -58,4 +85,34 @@ class ArchivoXUsuarioOutput(Outputable):
 		print(recursos)
 
 	def output_html(self):
-		print("ok!")
+		autores = sorted(set(i[0] for i in self.blame.blames))
+		for author in autores:
+			if self.changes.get_latest_email_by_author(author) in self.ignorar:
+				temp = []
+				for aut in autores:
+					if not aut == author:
+						temp.append(aut)
+				autores = temp
+		tabla = archs.AutorXUsuario.get(self.blame,	autores)
+		recursos = {}
+		for arch in tabla.items():
+			if "src/app/" in arch[0]:
+				path = arch[0].replace("src/app/","")
+				if "/" in path:
+					recurso = path.split("/")[0]
+					if recurso not in recursos:
+						recursos[recurso] = arch[1]
+					else:
+						for k in range(len(arch[1])):
+							recursos[recurso][k] += arch[1][k]
+		for recurso in recursos.items():
+			total = sum(recurso[1])
+			for i in range(len(recurso[1])):
+				recurso[1][i] = round((recurso[1][i]/total)*100,2)
+
+		archivos_html = "<div><div id=\"archivosxusuarios\" class=\"box\">"
+		archivos_html += "<p>" + _(ARCHIVOS_INFO_TEXT) + ".</p>"
+		print(archivos_html)
+		__output_row__html__(recursos, autores)
+		archivos_html = "</div></div>"
+		print(archivos_html)

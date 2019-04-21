@@ -26,8 +26,7 @@ from .. import responsibilities as resp
 from .outputable import Outputable
 
 RESPONSIBILITIES_INFO_TEXT = N_("The following responsibilities, by author, were found in the current "
-                                "revision of the repository (comments are excluded from the line count, "
-                                "if possible)")
+                                "revision of the repository")
 MOSTLY_RESPONSIBLE_FOR_TEXT = N_("is mostly responsible for")
 
 class ResponsibilitiesOutput(Outputable):

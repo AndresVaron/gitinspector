@@ -34,6 +34,8 @@ NUM_THREADS = multiprocessing.cpu_count()
 __thread_lock__ = threading.BoundedSemaphore(NUM_THREADS)
 __changes_lock__ = threading.Lock()
 
+ignorar = ["af.varon@uniandes.edu.co","s.rodriguezb1@sis.virtual.uniandes.edu.co"]
+
 class FileDiff(object):
 	def __init__(self, string):
 		commit_line = string.split("|")
