@@ -105,35 +105,37 @@ class ChangesOutput(Outputable):
 		total_changes = 0.0
 
 		for i in authorinfo_list:
-			total_changes += authorinfo_list.get(i).insertions
-			total_changes += authorinfo_list.get(i).deletions
+			if self.changes.get_latest_email_by_author(i) not in self.ignorar:
+				total_changes += authorinfo_list.get(i).insertions
+				total_changes += authorinfo_list.get(i).deletions
 
 		if authorinfo_list:
-			message_json = "\t\t\t\"message\": \"" + _(HISTORICAL_INFO_TEXT) + "\",\n"
+			message_json = "\t\t\"message\": \"" + _(HISTORICAL_INFO_TEXT) + "\",\n"
 			changes_json = ""
 
 			for i in sorted(authorinfo_list):
-				author_email = self.changes.get_latest_email_by_author(i)
-				authorinfo = authorinfo_list.get(i)
+				if self.changes.get_latest_email_by_author(i) not in self.ignorar:
+					author_email = self.changes.get_latest_email_by_author(i)
+					authorinfo = authorinfo_list.get(i)
 
-				percentage = 0 if total_changes == 0 else (authorinfo.insertions + authorinfo.deletions) / total_changes * 100
-				name_json = "\t\t\t\t\"name\": \"" + i + "\",\n"
-				email_json = "\t\t\t\t\"email\": \"" + author_email + "\",\n"
-				gravatar_json = "\t\t\t\t\"gravatar\": \"" + gravatar.get_url(author_email) + "\",\n"
-				commits_json = "\t\t\t\t\"commits\": " + str(authorinfo.commits) + ",\n"
-				insertions_json = "\t\t\t\t\"insertions\": " + str(authorinfo.insertions) + ",\n"
-				deletions_json = "\t\t\t\t\"deletions\": " + str(authorinfo.deletions) + ",\n"
-				percentage_json = "\t\t\t\t\"percentage_of_changes\": " + "{0:.2f}".format(percentage) + "\n"
+					percentage = 0 if total_changes == 0 else (authorinfo.insertions + authorinfo.deletions) / total_changes * 100
+					name_json = "\t\t\t\"name\": \"" + i + "\",\n"
+					email_json = "\t\t\t\"email\": \"" + author_email + "\",\n"
+					gravatar_json = "\t\t\t\"gravatar\": \"" + gravatar.get_url(author_email) + "\",\n"
+					commits_json = "\t\t\t\"commits\": " + str(authorinfo.commits) + ",\n"
+					insertions_json = "\t\t\t\"insertions\": " + str(authorinfo.insertions) + ",\n"
+					deletions_json = "\t\t\t\"deletions\": " + str(authorinfo.deletions) + ",\n"
+					percentage_json = "\t\t\t\"percentage_of_changes\": " + "{0:.2f}".format(percentage) + "\n"
 
-				changes_json += ("{\n" + name_json + email_json + gravatar_json + commits_json +
-				                 insertions_json + deletions_json + percentage_json + "\t\t\t}")
-				changes_json += ","
+					changes_json += ("{\n" + name_json + email_json + gravatar_json + commits_json +
+					                 insertions_json + deletions_json + percentage_json + "\t\t}")
+					changes_json += ","
 			else:
 				changes_json = changes_json[:-1]
 
-			print("\t\t\"changes\": {\n" + message_json + "\t\t\t\"authors\": [\n\t\t\t" + changes_json + "]\n\t\t}", end="")
+			print("\t\"changes\": {\n" + message_json + "\t\t\"authors\": [\n\t\t" + changes_json + "]\n\t}", end="")
 		else:
-			print("\t\t\"exception\": \"" + _(NO_COMMITED_FILES_TEXT) + "\"")
+			print("\t\"exception\": \"" + _(NO_COMMITED_FILES_TEXT) + "\"")
 
 	def output_text(self):
 		authorinfo_list = self.changes.get_authorinfo_list()

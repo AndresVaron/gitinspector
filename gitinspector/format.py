@@ -109,20 +109,17 @@ def output_header(repos):
 		                         show_minor_rows=_("Show rows with minor work"),
 		                         hide_minor_rows=_("Hide rows with minor work")))
 	elif __selected_format__ == "json":
-		print("{\n\t\"gitinspector\": {")
-		print("\t\t\"version\": \"" + version.__version__ + "\",")
-
 		if len(repos) <= 1:
-			print("\t\t\"repository\": \"" + repos_string + "\",")
+			print("{\n\t\"repository\": \"" + repos_string + "\",")
 		else:
-			repos_json = "\t\t\"repositories\": [ "
+			repos_json = "\t\"repositories\": [ "
 
 			for repo in repos:
 				repos_json += "\"" + repo.name + "\", "
 
 			print(repos_json[:-2] + " ],")
 
-		print("\t\t\"report_date\": \"" + time.strftime("%Y/%m/%d") + "\",")
+		print("\t\"report_date\": \"" + time.strftime("%Y/%m/%d") + "\",")
 
 	elif __selected_format__ == "xml":
 		print("<gitinspector>")
@@ -149,6 +146,6 @@ def output_footer():
 		html_footer = __output_html_template__(base + "/html/html.footer")
 		print(html_footer)
 	elif __selected_format__ == "json":
-		print("\n\t}\n}")
+		print("\n}")
 	elif __selected_format__ == "xml":
 		print("</gitinspector>")

@@ -39,7 +39,8 @@ from .output.responsibilitiesoutput import ResponsibilitiesOutput
 from .output.archivoxusuariooutput import ArchivoXUsuarioOutput
 from .output.timelineoutput import TimelineOutput
 
-ignorar = ["af.varon@uniandes.edu.co","s.rodriguezb1@sis.virtual.uniandes.edu.co","s.rodriguezb1@uniandes.edu.co "]
+# ignorar = ["af.varon@uniandes.edu.co","s.rodriguezb1@sis.virtual.uniandes.edu.co","s.rodriguezb1@uniandes.edu.co","s.rodriguezm@sis.virtual.uniandes.edu.co","jprietoarcila@gmail.com","iam@camilosalinas.me"]
+ignorar = []
 localization.init()
 
 class Runner(object):
@@ -53,6 +54,7 @@ class Runner(object):
 		self.timeline = False
 		self.useweeks = False
 		self.archivoxusuario = False
+		self.recursoxusuario = False
 		self.semanal = False
 		self.blmout = False
 
@@ -101,7 +103,10 @@ class Runner(object):
 				outputable.output(ResponsibilitiesOutput(summed_changes, summed_blames))
 
 			if self.archivoxusuario:
-				outputable.output(ArchivoXUsuarioOutput(summed_changes, summed_blames, ignorar))
+				outputable.output(ArchivoXUsuarioOutput(summed_changes, summed_blames, ignorar,"archivos"))
+
+			if self.recursoxusuario:
+				outputable.output(ArchivoXUsuarioOutput(summed_changes, summed_blames, ignorar,"recursos"))
 
 			if self.semanal:
 				outputable.output(SemanalOutput(summed_changes, summed_blames))
@@ -146,7 +151,7 @@ def main():
 
 	try:
 		opts, args = optval.gnu_getopt(argv[1:], "f:F:hHlLmrTwx:", ["exclude=", "file-types=", "format=",
-		                                         "hard:true","AxU", "help", "list-file-types:true", "localize-output:true",
+		                                         "hard:true","AxU","RxU", "help", "list-file-types:true", "localize-output:true",
 		                                         "metrics:true", "responsibilities:true", "since=", "grading:true", "semanal",
 		                                         "timeline:true", "until=", "version", "weeks:true", "blms"])
 		repos = __get_validated_git_repos__(set(args))
@@ -217,6 +222,8 @@ def main():
 				filtering.add(a)
 			elif o == "--AxU":
 				run.archivoxusuario = True
+			elif o == "--RxU":
+				run.recursoxusuario = True
 			elif o == "--semanal":
 				run.semanal = True
 		__check_python_version__()

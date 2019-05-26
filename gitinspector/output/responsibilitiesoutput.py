@@ -76,8 +76,6 @@ class ResponsibilitiesOutput(Outputable):
 
 					resp_xml += "<div" + (" class=\"odd\">" if j % 2 == 1 else ">") + entry[1] + \
 					            " (" + str(entry[0]) + " lines)</div>"
-					if j >= 15:
-						break
 
 				resp_xml += "</div>"
 		resp_xml += "</div></div>"

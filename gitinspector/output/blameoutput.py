@@ -95,27 +95,27 @@ class BlameOutput(Outputable):
 		print(blame_xml)
 
 	def output_json(self):
-		message_json = "\t\t\t\"message\": \"" + _(BLAME_INFO_TEXT) + "\",\n"
+		message_json = "\t\t\"message\": \"" + _(BLAME_INFO_TEXT) + "\",\n"
 		blame_json = ""
 
 		for i in sorted(self.blame.get_summed_blames().items()):
 			author_email = self.changes.get_latest_email_by_author(i[0])
 
-			name_json = "\t\t\t\t\"name\": \"" + i[0] + "\",\n"
-			email_json = "\t\t\t\t\"email\": \"" + author_email + "\",\n"
-			gravatar_json = "\t\t\t\t\"gravatar\": \"" + gravatar.get_url(author_email) + "\",\n"
-			rows_json = "\t\t\t\t\"rows\": " + str(i[1].rows) + ",\n"
-			stability_json = ("\t\t\t\t\"stability\": " + "{0:.1f}".format(Blame.get_stability(i[0], i[1].rows,
+			name_json = "\t\t\t\"name\": \"" + i[0] + "\",\n"
+			email_json = "\t\t\t\"email\": \"" + author_email + "\",\n"
+			gravatar_json = "\t\t\t\"gravatar\": \"" + gravatar.get_url(author_email) + "\",\n"
+			rows_json = "\t\t\t\"rows\": " + str(i[1].rows) + ",\n"
+			stability_json = ("\t\t\t\"stability\": " + "{0:.1f}".format(Blame.get_stability(i[0], i[1].rows,
 			                  self.changes)) + ",\n")
-			age_json = ("\t\t\t\t\"age\": " + "{0:.1f}".format(float(i[1].skew) / i[1].rows) + ",\n")
-			percentage_in_comments_json = ("\t\t\t\t\"percentage_in_comments\": " +
+			age_json = ("\t\t\t\"age\": " + "{0:.1f}".format(float(i[1].skew) / i[1].rows) + ",\n")
+			percentage_in_comments_json = ("\t\t\t\"percentage_in_comments\": " +
 			                               "{0:.2f}".format(100.0 * i[1].comments / i[1].rows) + "\n")
 			blame_json += ("{\n" + name_json + email_json + gravatar_json + rows_json + stability_json + age_json +
-			              percentage_in_comments_json + "\t\t\t},")
+			              percentage_in_comments_json + "\t\t},")
 		else:
 			blame_json = blame_json[:-1]
 
-		print(",\n\t\t\"blame\": {\n" + message_json + "\t\t\t\"authors\": [\n\t\t\t" + blame_json + "]\n\t\t}", end="")
+		print(",\n\t\"blame\": {\n" + message_json + "\t\t\"authors\": [\n\t\t" + blame_json + "]\n\t}", end="")
 
 	def output_text(self):
 		if sys.stdout.isatty() and format.is_interactive_format():

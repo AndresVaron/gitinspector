@@ -292,4 +292,5 @@ class Changes(object):
 		return self.authors_by_email[name]
 
 	def get_latest_email_by_author(self, name):
+		#print(self.emails_by_author[name])
 		return self.emails_by_author[name]

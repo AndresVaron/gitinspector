@@ -85,7 +85,7 @@ def __output_row__html__(timeline_data, periods, names, useweeks):
 			for period in periods:
 				multiplier = timeline_data.get_multiplier(period, 18)
 				signs = timeline_data.get_author_signs_in_period(name[0], period, multiplier)
-				signs_str = (signs[1] * "<div class=\"remove\">&nbsp;</div>" + signs[0] * "<div class=\"insert\">&nbsp;</div>")
+				signs_str = (int(signs[1]) * "<div class=\"remove\">&nbsp;</div>" + int(signs[0]) * "<div class=\"insert\">&nbsp;</div>")
 
 				timeline_xml += "<td>" + ("." if timeline_data.is_author_in_period(period, name[0]) and len(signs_str) == 0 else signs_str)
 				timeline_xml += "</td>"
@@ -141,43 +141,50 @@ class TimelineOutput(Outputable):
 
 	def output_json(self):
 		if self.changes.get_commits():
-			message_json = "\t\t\t\"message\": \"" + _(TIMELINE_INFO_TEXT) + "\",\n"
+			message_json = "\t\t\"message\": \"" + _(TIMELINE_INFO_TEXT) + "\",\n"
 			timeline_json = ""
-			periods_json = "\t\t\t\"period_length\": \"{0}\",\n".format("week" if self.useweeks else "month")
-			periods_json += "\t\t\t\"periods\": [\n\t\t\t"
+			periods_json = "\t\t\"period_length\": \"{0}\",\n".format("week" if self.useweeks else "month")
+			periods_json += "\t\t\"periods\": [\n\t\t"
 
-			timeline_data = timeline.TimelineData(self.changes, self.useweeks)
+			timeline_data = timeline.TimelineData(self.changes, self.useweeks,self.ignorar)
 			periods = timeline_data.get_periods()
+
 			names = timeline_data.get_authors()
 
 			for period in periods:
-				name_json = "\t\t\t\t\"name\": \"" + str(period) + "\",\n"
-				authors_json = "\t\t\t\t\"authors\": [\n\t\t\t\t"
+
+				if self.useweeks:
+					date_obj = datetime.strptime((period+" 1"), '%GW%V %u')
+					start_of_week = date_obj - timedelta(days=date_obj.weekday())  # Monday
+					end_of_week = start_of_week + timedelta(days=6)  # Sunday
+					name_json = "\t\t\t\"name\": \"" + start_of_week.strftime('%d/%m') + " - " + end_of_week.strftime('%d/%m') + "\",\n"
+				else:
+					name_json = "\t\t\t\"name\": \"" + str(period) + "\",\n"
+				authors_json = "\t\t\t\"authors\": [\n\t\t\t"
 
 				for name in names:
 					if timeline_data.is_author_in_period(period, name[0]):
-						multiplier = timeline_data.get_multiplier(period, 24)
-						signs = timeline_data.get_author_signs_in_period(name[0], period, multiplier)
-						signs_str = (signs[1] * "-" + signs[0] * "+")
+						signs = timeline_data.get_author_signs_in_period(name[0], period, 100)
+						signs_str = ("dels:"+str(round(signs[1],2)) + ",adds:" + str(round(signs[0],2)))
 
 						if len(signs_str) == 0:
 							signs_str = "."
 
-						authors_json += "{\n\t\t\t\t\t\"name\": \"" + name[0] + "\",\n"
-						authors_json += "\t\t\t\t\t\"email\": \"" + name[1] + "\",\n"
-						authors_json += "\t\t\t\t\t\"gravatar\": \"" + gravatar.get_url(name[1]) + "\",\n"
-						authors_json += "\t\t\t\t\t\"work\": \"" + signs_str + "\"\n\t\t\t\t},"
+						authors_json += "{\n\t\t\t\t\"name\": \"" + name[0] + "\",\n"
+						authors_json += "\t\t\t\t\"email\": \"" + name[1] + "\",\n"
+						authors_json += "\t\t\t\t\"gravatar\": \"" + gravatar.get_url(name[1]) + "\",\n"
+						authors_json += "\t\t\t\t\"work\": \"" + signs_str + "\"\n\t\t\t},"
 				else:
 					authors_json = authors_json[:-1]
 
 				authors_json += "],\n"
-				modified_rows_json = "\t\t\t\t\"modified_rows\": " + \
+				modified_rows_json = "\t\t\t\"modified_rows\": " + \
 				                    str(timeline_data.get_total_changes_in_period(period)[2]) + "\n"
-				timeline_json += "{\n" + name_json + authors_json + modified_rows_json + "\t\t\t},"
+				timeline_json += "{\n" + name_json + authors_json + modified_rows_json + "\t\t},"
 			else:
 				timeline_json = timeline_json[:-1]
 
-			print(",\n\t\t\"timeline\": {\n" + message_json + periods_json + timeline_json + "]\n\t\t}", end="")
+			print(",\n\t\"timeline\": {\n" + message_json + periods_json + timeline_json + "]\n\t}", end="")
 
 	def output_xml(self):
 		if self.changes.get_commits():

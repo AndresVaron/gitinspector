@@ -81,7 +81,7 @@ class TimelineData(object):
 		if authorinfo:
 			i = multiplier * (self.entries[(author, period)].insertions / total)
 			j = multiplier * (self.entries[(author, period)].deletions / total)
-			return (int(i), int(j))
+			return (float(i), float(j))
 		else:
 			return (0, 0)
 
