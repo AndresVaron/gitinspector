@@ -39,7 +39,7 @@ from .output.responsibilitiesoutput import ResponsibilitiesOutput
 from .output.archivoxusuariooutput import ArchivoXUsuarioOutput
 from .output.timelineoutput import TimelineOutput
 
-ignorar = ["35813015+AndresVaron@users.noreply.github.com","af.varon@PY-ejemplos2603.sis.virtual.uniandes.edu.co","af.varon@uniandes.edu.co","s.rodriguezb1@sis.virtual.uniandes.edu.co","s.rodriguezb1@uniandes.edu.co","s.rodriguezm@sis.virtual.uniandes.edu.co","jprietoarcila@gmail.com","iam@camilosalinas.me"]
+ignorar = ["rcasalla@uniandes.edu.co","35813015+AndresVaron@users.noreply.github.com","af.varon@PY-ejemplos2603.sis.virtual.uniandes.edu.co","af.varon@uniandes.edu.co","s.rodriguezb1@sis.virtual.uniandes.edu.co","s.rodriguezb1@uniandes.edu.co","s.rodriguezm@sis.virtual.uniandes.edu.co","jprietoarcila@gmail.com","iam@camilosalinas.me"]
 localization.init()
 
 class Runner(object):
